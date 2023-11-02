@@ -20,6 +20,7 @@ public class BaseTimeEntity {
     @Column(name = "modified_date")
     private LocalDateTime modifiedDate;  // 최종 수정일시
 
+    //@PrePersist를 붙이면 DB에 들어가기 전에 체크하라 이런 의미
     @PrePersist   //JPA 엔티티가 저장(Insert)되기 전에 실행할 메서드를 지정
     public void prePersist() {
         this.createdDate = LocalDateTime.now();

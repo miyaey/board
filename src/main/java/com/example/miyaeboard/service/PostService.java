@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +19,7 @@ import java.util.Optional;
 public class PostService {
     private final PostRepository postRepository;
 
-    //전체 리스트 받아오기
+    //전체 리스트 받아오기(Page를 만들어서 지금 쓰진 않음)
     public List<Post> getList() {
         return this.postRepository.findAll();
     }
@@ -51,4 +52,27 @@ public class PostService {
         }
 
     }
+
+    //11/01 과제 create 만들어 보기
+    public void create(String subject, String content){
+        Post q = new Post();
+        q.setSubject(subject); //입력 들어온 것 (subject, content)
+        q.setContent(content);
+        q.setCreatedDate(LocalDateTime.now());
+        this.postRepository.save(q); //받은 값을 postRepository에 save하라
+    }
+
+    public void update(Post post, String subject, String content){
+        post.setSubject(subject);
+        post.setContent(content);
+        post.setModifiedDate(LocalDateTime.now()); //BaseTimeEntity에서 자동으로 넣어주는데 설명을 위해 넣어주신 것
+        this.postRepository.save(post);
+    }
+    //create, update가 각각 q, post인건 상관없음 코드 짜는 사람 마음!!
+
+    public void delete(Integer id) {
+
+        postRepository.deleteById(id);
+    }
+
 }

@@ -12,7 +12,7 @@
 <div class="container">
     <!--    <h1>게시글 작성</h1>-->
     <!--    <form action="/post/create/action" method="post">-->
-    <h2 style="font-size: 16px;">게시글 쓰기</h2>
+    <h2 style="font-size: 20px;" class="pt-4">게시글 쓰기</h2>
     <form th:action="@{/post/create}" th:object="${postRequest}" method="post">
         <div class="alert alert-danger" role="alert" th:if="${#fields.hasAnyErrors()}">
             <div th:each="err : ${#fields.allErrors()}" th:text="${err}" />
