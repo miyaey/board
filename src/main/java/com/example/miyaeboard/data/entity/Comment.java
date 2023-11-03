@@ -19,7 +19,6 @@ public class Comment extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-
     @ManyToOne
     private Post post;
 
