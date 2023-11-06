@@ -1,6 +1,8 @@
 package com.example.miyaeboard.data.entity;
 
 import com.example.miyaeboard.data.common.BaseTimeEntity;
+import com.example.miyaeboard.data.common.MemberRole;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,4 +28,16 @@ public class Member extends BaseTimeEntity {
 
     @Column(name = "name")
     private String name;         // 이름
+
+    @Enumerated(EnumType.STRING)
+    private MemberRole memberRole = MemberRole.USER;
+
+    @Builder
+    public Member(String nickname, String password, String name){
+        this.nickname = nickname;
+        this.password = password;
+        this.name = name;
+    }
 }
+
+

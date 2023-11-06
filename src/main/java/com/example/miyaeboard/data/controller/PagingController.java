@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class PagingController {
     private final PostService postService;
 
-    @GetMapping("/listpage")
+    @GetMapping("/list")
     public String list(Model model, @RequestParam(value = "page", defaultValue = "0")
     int page, @RequestParam(value = "kw", required = false) String kw){
         Page<Post> paging = postService.getPage(kw, page);
         model.addAttribute("paging", paging);
         model.addAttribute("kw", kw); //검색어를 뷰로 전달
-        return "listpage";
+        return "post_list";
     }
 }

@@ -10,8 +10,17 @@ public class MainController {
 //    public String index() {
 //        return "hello";
 //    }
+//    @GetMapping("/")
+//    public String root(){
+//        return "redirect:/post/listpage";
+//    }
     @GetMapping("/")
     public String root(){
-        return "redirect:/post/listpage";
+        return "redirect:/post/list";
     }
+    @GetMapping("/post/listpage")
+    public String listpageing(){
+        return "redirect:/post/list";
+    }
+
 }
