@@ -2,6 +2,7 @@ package com.example.miyaeboard.service;
 
 import com.example.miyaeboard.config.DataNotFoundException;
 import com.example.miyaeboard.data.dto.CommentResponse;
+import com.example.miyaeboard.data.dto.MemberResponse;
 import com.example.miyaeboard.data.dto.PostResponse;
 import com.example.miyaeboard.data.entity.Comment;
 import com.example.miyaeboard.repository.CommentRepository;
@@ -18,18 +19,23 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final ModelMapper modelMapper;
+
     private Comment of(CommentResponse commentResponse) {
+
         return modelMapper.map(commentResponse, Comment.class);
     }
     private CommentResponse of(Comment comment) {
+
         return modelMapper.map(comment, CommentResponse.class);
     }
 
-    public CommentResponse create(PostResponse postResponse, String content) {
+
+    public CommentResponse create(PostResponse postResponse, String content, MemberResponse author) {
         CommentResponse commentResponse = new CommentResponse();
         commentResponse.setContent(content);
-        commentResponse.setCreatedDate(LocalDateTime.now());
+//        commentResponse.setCreatedDate(LocalDateTime.now());
         commentResponse.setPost(postResponse);
+        commentResponse.setAuthor(author);
         Comment comment = of(commentResponse);
         comment = this.commentRepository.save(comment);
         commentResponse.setId(comment.getId());

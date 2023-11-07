@@ -6,15 +6,18 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 
 @Getter
 @Setter
+@Component
 @NoArgsConstructor
 @Entity
 @Table
 public class Member extends BaseTimeEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -33,11 +36,12 @@ public class Member extends BaseTimeEntity {
     private MemberRole memberRole = MemberRole.USER;
 
     @Builder
-    public Member(String nickname, String password, String name){
+    public Member(String nickname, String password, String name) {
         this.nickname = nickname;
         this.password = password;
         this.name = name;
     }
+
 }
 
 

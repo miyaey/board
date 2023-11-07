@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Getter
 @Setter
-public class CommentResponse extends BaseTimeEntity {
+public class CommentResponse {
     private Integer id;
     private String content;
     private PostResponse post;

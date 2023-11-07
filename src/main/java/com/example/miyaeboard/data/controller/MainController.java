@@ -5,22 +5,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class MainController {
-//    @GetMapping("/") //루트가 들어오면 hello라고 문자열을 띄워 달라 (루트 디렉토리)
-//    @ResponseBody //이걸 붙이면 그냥 이 문구를 띄워달라는 의미
-//    public String index() {
-//        return "hello";
-//    }
-//    @GetMapping("/")
-//    public String root(){
-//        return "redirect:/post/listpage";
-//    }
+
     @GetMapping("/")
-    public String root(){
-        return "redirect:/post/list";
+    public String root() {
+
+        return "redirect:/post/list";       //--> 매핑될 URL "페이지이름 아님 주의"
     }
     @GetMapping("/post/listpage")
-    public String listpageing(){
-        return "redirect:/post/list";
+    public String listpageing() {
+
+        return "redirect:/post/list";       //--> 매핑될 URL "페이지이름 아님 주의"
     }
 
 }

@@ -1,17 +1,23 @@
 package com.example.miyaeboard.data.controller;
 
 import com.example.miyaeboard.data.dto.CommentRequest;
+import com.example.miyaeboard.data.dto.MemberResponse;
 import com.example.miyaeboard.data.dto.PostRequest;
 import com.example.miyaeboard.data.dto.PostResponse;
 import com.example.miyaeboard.data.entity.Post;
+import com.example.miyaeboard.service.MemberService;
 import com.example.miyaeboard.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 @RequestMapping("/post")
 @RequiredArgsConstructor
@@ -19,6 +25,7 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
     private final PostResponse postResponse;
+    private final MemberService memberService;
 
     //이제 안 써서 주석처리
 //    @GetMapping("/list") //"/post/list"와 같음
@@ -35,63 +42,79 @@ public class PostController {
         return "post_detail";
     }
 
+    //11/7 @PreAuthorize 추가
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/create")
     public String postCreate(PostRequest postRequest) {
+
         return "post_form";
     }
 
-    @PostMapping("/create") //@Valid는 우리가 Postrequest에 validation 체크하게 해놨음 거기랑 매핑이 되는거임
-    public String postCreate(@Valid PostRequest postRequest, BindingResult bindingResult) { //Bindingresult에 연결이 되는 것
-        if (bindingResult.hasErrors()) { //hasErros 우리가 Postrequest에 해놓은 글자수나 null이면 안되는 경우 에러 발생
+    //  PostRequest --> @NotEmpty, @Size 등으로 설정한 검증 기능 동작
+// BindingResult 매개변수는 @Valid 애너테이션으로 인해 검증이 수행된 결과를 의미하는 객체이다.
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/create")
+    public String postCreate(@Valid PostRequest postRequest,
+                             BindingResult bindingResult, Principal principal) {
+        if (bindingResult.hasErrors()) {
             return "post_form";
         }
-        this.postService.create(postRequest.getSubject(), postRequest.getContent()); //에러가 없다면 받은 subject, content 출력
-        return "redirect:/post/listpage";
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "등록 권한이 없습니다.");
+        }
+        MemberResponse memberResponse = this.memberService.getMember(principal.getName());
+        this.postService.create(postRequest.getSubject(), postRequest.getContent(), memberResponse);
+        return "redirect:/post/list";
     }
 
-    @GetMapping("update/{id}") //수정 버튼을 눌렀을 때 id를 가진 URL로 옮겨라(post form) 그 후에 PostMapping
-    public String postUpdate(PostRequest postRequest, @PathVariable("id") Integer id) {
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("update/{id}")
+    public String postUpdate(PostRequest postRequest, @PathVariable("id") Integer id, Principal principal) {
         PostResponse postResponse = this.postService.getPost(id);
+        if(!postResponse.getAuthor().getNickname().equals(principal.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
+        }
         postRequest.setSubject(postResponse.getSubject());
         postRequest.setContent(postResponse.getContent());
         return "post_update";
     }
 
-//이전 @PostMapping
-//    @PostMapping("update/{id}")
-//    public String postUpdate(@Valid PostRequest postRequest, BindingResult bindingResult, @PathVariable("id") Integer id) {
-//        if (bindingResult.hasErrors()) {
-//            return "post_form";
-//        }
-//        Post post = this.postService.getPost(id);
-//        this.postService.update(post, postRequest.getSubject(), postRequest.getContent());
-//        return String.format("redirect:/post/detail/%s", id); //%s는 스트링값
-//    }
-
-    //11/03 새로 만든 update @PostMapping
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("update/{id}")
-    public String postUpdate(@Valid PostRequest postRequest, BindingResult bindingResult, @PathVariable("id") Integer id) {
+    public String postUpdate(@Valid PostRequest postRequest, BindingResult bindingResult, Principal principal,
+                             @PathVariable("id") Integer id) {
         if (bindingResult.hasErrors()) {
             return "post_update";
         }
         PostResponse postResponse = this.postService.getPost(id);
+        if (!postResponse.getAuthor().getNickname().equals(principal.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
+        }
         this.postService.update(postResponse, postRequest.getSubject(), postRequest.getContent());
-        return String.format("redirect:/post/detail/%s", id);   // 현재 요청을 /post/detail/{id}로 리디렉션
+        return String.format("redirect:/post/detail/%s", id);   //  /post/detail/{id}로 리디렉션
     }
 
-    //이전 delete @GetMapping
-//    @GetMapping("/delete/{id}")
-//    public String postdelete(@PathVariable Integer id) {
-//        postService.delete(id);
-//        return "redirect:/post/listpage";
-//    }
-
-    //11/03 새로 만든 delete @GetMapping
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{id}")
-    public String postdelete(@PathVariable Integer id) {
+    public String postdelete(Principal principal, @PathVariable("id") Integer id) {
         PostResponse postResponse = this.postService.getPost(id);
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "삭제권한이 없습니다..");
+        }
+        if (!postResponse.getAuthor().getNickname().equals(principal.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제권한이 없습니다.");
+        }
         this.postService.delete(postResponse);
-        return "redirect:/post/listpage";
+        return "redirect:/post/list";
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/vote/{id}")
+    public String postVote(Principal principal, @PathVariable("id") Integer id) {
+        PostResponse postResponse = this.postService.getPost(id);
+        MemberResponse memberResponse = this.memberService.getMember(principal.getName());
+        this.postService.vote(postResponse, memberResponse);
+        return String.format("redirect:/post/detail/%s", id);
     }
 }
 
