@@ -1,4 +1,4 @@
-package com.example.miyaeboard.data.controller;
+package com.example.miyaeboard.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,4 +1,4 @@
-package com.example.miyaeboard.data.controller;
+package com.example.miyaeboard.controller;
 
 import com.example.miyaeboard.data.dto.MemberRequest;
 import com.example.miyaeboard.service.MemberService;
